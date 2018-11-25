@@ -1,5 +1,11 @@
 .App {
   text-align: center;
+  display: flex;
+  justify-content: space-around;
+}
+
+a {
+  text-decoration: none;
 }
 
 .App-logo {
