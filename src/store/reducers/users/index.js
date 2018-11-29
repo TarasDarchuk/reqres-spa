@@ -1,4 +1,4 @@
-import { GET_DATA, DELETE_USER, EDIT_USER } from "../../consts";
+import { GET_DATA, DELETE_USER, EDIT_USER } from "../../constants";
 
 const users = (state = [], action) => {
   switch (action.type) {

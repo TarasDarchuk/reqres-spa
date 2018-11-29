@@ -7,8 +7,8 @@ import User from "../User";
 export default () => {
   return (
     <Router>
-      <div className="App">
-        <Route path="/" component={List} />
+      <div>
+        <Route exact path="/" component={List} />
         <Route path="/:username" component={User} />
       </div>
     </Router>

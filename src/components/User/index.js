@@ -1,18 +1,19 @@
 import React, { Component } from "react";
-
+import Input from "./Input";
+import Button from "./Button";
 import { connect } from "react-redux";
 import { deleteUser, editUser } from "../../actions";
 import { StyleSheet, css } from "aphrodite";
+import { Link } from "react-router-dom";
 
 class User extends Component {
   constructor(props) {
     super(props);
     this.state = {
       edit: false,
-      firstName: "",
-      lastName: "",
       deleted: false,
-      deleting: false
+      deleting: false,
+      saved: false
     };
   }
 
@@ -20,120 +21,78 @@ class User extends Component {
     this.props.deleteUser(id);
     this.setState({ deleted: true });
   }
-
-  editUser(obj) {
-    this.props.editUser(obj);
-    this.setState({ edit: false });
-  }
-
-  edit() {
-    this.setState({
-      edit: true
-    });
-  }
-
-  handleChange(e, key) {
-    this.setState({
-      [key]: e.target.value
-    });
-  }
-
-  componentWillMount() {
-    if (!this.state.firstName) {
-      this.setState({
-        firstName: this.props.location.state.firstName,
-        lastName: this.props.location.state.lastName
-      });
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps !== this.props) {
-      this.setState({
-        firstName: this.props.location.state.firstName,
-        lastName: this.props.location.state.lastName
-      });
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps !== this.props) {
+  componentWillUpdate(prevProps) {
+    if (prevProps.location.state !== this.props.location.state) {
       this.setState({
         edit: false,
         deleted: false,
-        deleting: false,
-        firstName: this.props.location.state.firstName,
-        lastName: this.props.location.state.lastName
+        deleting: false
       });
     }
+  }
+
+  editUser() {
+    const { location } = this.props;
+    const { firstName } = this.refs;
+    const lastName = this.refs.lastName.state.value
+      ? this.refs.lastName.state.value
+      : location.state.last_name;
+    const data = {
+      ...location.state,
+      firstName: firstName.state.value
+        ? firstName.state.value
+        : location.state.first_name,
+      lastName: lastName
+    };
+    this.props.editUser(data);
   }
 
   render() {
     const { location } = this.props;
     return (
       <div className={css(styles.wrap)}>
+        <Link to="/" className={css(styles.back)}>
+          ◄ Back to list
+        </Link>
         <h1>User info:</h1>
         {this.state.deleted ? (
           "User is deleted"
         ) : (
           <div className={css(styles.user)}>
-            <div>
-              <img src={location.state.avatar} alt="" />
-            </div>
+            <img
+              src={location.state.avatar}
+              style={{ maxHeight: 128 }}
+              alt=""
+            />
             <div className={css(styles.info)}>
               <span>
-                First name:{" "}
-                {this.state.edit ? (
-                  <input
-                    type="text"
-                    onChange={e => this.handleChange(e, "firstName")}
-                    defaultValue={this.state.firstName}
-                  />
-                ) : (
-                  this.state.firstName
-                )}
+                First name: {/* {this.state.edit ? ( */}
+                <Input
+                  editMode={this.state.edit}
+                  ref="firstName"
+                  defaultValue={location.state.first_name}
+                />
               </span>
               <br />
               <span>
                 Last name:{" "}
-                {this.state.edit ? (
-                  <input
-                    type="text"
-                    onChange={e => this.handleChange(e, "lastName")}
-                    defaultValue={this.state.lastName}
-                  />
-                ) : (
-                  this.state.lastName
-                )}
+                <Input
+                  editMode={this.state.edit}
+                  ref="lastName"
+                  defaultValue={location.state.last_name}
+                />
               </span>
               <br />
-              {this.state.edit ? (
-                <div>
-                  <button
-                    className={css(styles.edit)}
-                    onClick={() => {
-                      this.editUser({
-                        index: location.state.index,
-                        firstName: this.state.firstName,
-                        lastName: this.state.lastName,
-                        id: location.state.id,
-                        avatar: location.state.avatar
-                      });
-                    }}
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <button
-                    className={css(styles.edit)}
-                    onClick={() => this.edit()}
-                  >
-                    Edit User Info
-                  </button>
-                </div>
-              )}
+              <Button
+                style={css(styles.edit)}
+                action={() => {
+                  this.state.edit
+                    ? this.editUser()
+                    : this.setState({ edit: true });
+                }}
+                value={this.state.edit ? "Save Changes" : "Edit User Info"}
+              />
+
               {this.state.deleting ? (
                 <div>
                   <span>Are you sure?</span>
@@ -167,49 +126,64 @@ class User extends Component {
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    users: state.list
-  };
-};
-
 const styles = StyleSheet.create({
   wrap: {
-    marginTop: 20,
-    borderLeft: "1px solid grey",
-    paddingLeft: 20,
-    fontSize: 20
+    marginTop: 50,
+    textAlign: "center"
   },
   user: {
-    float: "right",
-    width: 500,
     display: "flex",
-    textAlign: "left"
+    fontSize: 20,
+    textAlign: "left",
+    width: "fit-content",
+    marginLeft: "auto",
+    marginRight: "auto"
   },
   info: {
     paddingLeft: 10
   },
   edit: {
-    backgroundColor: "pink",
-    width: "fit-content",
+    backgroundColor: "orange",
+    width: "100px",
     padding: 5,
-    border: "2px solid black",
-    borderRadius: 3,
+    borderRadius: 10,
+    border: "none",
     ":hover": {
       cursor: "pointer"
+    },
+    ":active": {
+      color: "red"
     }
   },
   delete: {
     color: "white",
+    width: "100px",
     padding: 5,
     backgroundColor: "red",
-    borderRadius: 3,
-    borderColor: "black",
+    borderRadius: 10,
+    border: "none",
     ":hover": {
       cursor: "pointer"
+    },
+    ":active": {
+      color: "orange"
+    }
+  },
+  back: {
+    textDecoration: "none",
+    color: "black",
+    fontWeight: "bold",
+    ":hover": {
+      color: "orange"
     }
   }
 });
+
+const mapStateToProps = state => {
+  return {
+    users: state.users
+  };
+};
 
 export default connect(
   mapStateToProps,

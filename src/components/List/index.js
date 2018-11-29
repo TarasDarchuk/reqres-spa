@@ -1,52 +1,42 @@
 import React, { Component } from "react";
 import { StyleSheet, css } from "aphrodite";
-import axios from "axios";
 import { getData } from "../../actions";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 class List extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      users: []
-    };
-  }
-
-  getData(page) {
+  getData = page => {
     this.props.getData(page);
-  }
+  };
 
   componentWillMount() {
-    this.getData(1);
-    this.getData(2);
-    this.getData(3);
-    this.getData(4);
+    if (this.props.users.length === 0) {
+      this.props.getData();
+    }
   }
 
   render() {
+    const { users } = this.props;
     return (
       <div className={css(styles.list)}>
-        <h1>List of users:</h1>
+        <h1>List of users</h1>
         <ul className={css(styles.ul)}>
-          {this.props.users.map((user, index) => (
-            <Link
-              to={{
-                pathname: `/${user.first_name}_${user.last_name}`,
-                state: {
-                  avatar: user.avatar,
-                  firstName: user.first_name,
-                  lastName: user.last_name,
-                  id: user.id,
-                  index: index
-                }
-              }}
-              key={index}
-            >
-              <li className={css(styles.li)}>
+          {users.map((user, index) => (
+            <li>
+              <Link
+                to={{
+                  pathname: `/${user.id}`,
+                  state: {
+                    ...user,
+                    index: index
+                  }
+                }}
+                key={index}
+                className={css(styles.li)}
+              >
                 {user.first_name} {user.last_name}
-              </li>
-            </Link>
+              </Link>
+            </li>
           ))}
         </ul>
       </div>
@@ -56,21 +46,18 @@ class List extends Component {
 
 const styles = StyleSheet.create({
   list: {
-    color: "red",
-    textAlign: "left",
-    width: 500
+    color: "black",
+    textAlign: "center"
   },
   ul: {
     listStyleType: "none",
-    fontSize: 30,
-    textAlign: "left",
-    width: "fit-content"
+    fontSize: 30
   },
   li: {
-    color: "red",
+    color: "black",
     textDecoration: "none",
     ":hover": {
-      fontSize: 50,
+      color: "orange",
       cursor: "pointer"
     }
   }
